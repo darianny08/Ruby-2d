@@ -24,7 +24,15 @@ public class RubyController : MonoBehaviour
     
     Animator animator;
     Vector2 lookDirection = new Vector2(1,0);
-    
+
+    public GameObject dialougeOne;
+    public GameObject dialougeTwo;
+    float dialougeTimer = 4.0f;
+
+    AudioSource audioSource;
+    public AudioClip throwSound;
+    public AudioClip hurtSound;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,6 +40,17 @@ public class RubyController : MonoBehaviour
         animator = GetComponent<Animator>();
         
         currentHealth = maxHealth;
+        audioSource= GetComponent<AudioSource>();
+        StartCoroutine("StartDialogue");
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        audioSource.PlayOneShot(clip);
+
+
+
+        
     }
 
     // Update is called once per frame
@@ -63,6 +82,18 @@ public class RubyController : MonoBehaviour
         {
             Launch();
         }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            RaycastHit2D hit = Physics2D.Raycast(rigidbody2d.position + Vector2.up * 0.2f, lookDirection, 1.5f, LayerMask.GetMask("npc"));
+            NonPlayerCharacter character = hit.collider.GetComponent<NonPlayerCharacter>();
+            if (hit.collider != null)
+            {
+                character.DisplayDialog();
+            }
+        }
+
+
     }
     
     void FixedUpdate()
@@ -83,6 +114,7 @@ public class RubyController : MonoBehaviour
             
             isInvincible = true;
             invincibleTimer = timeInvincible;
+            PlaySound(hurtSound);
         }
         
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
@@ -100,5 +132,23 @@ public class RubyController : MonoBehaviour
         projectile.Launch(lookDirection, 300);
 
         animator.SetTrigger("Launch");
+        PlaySound(throwSound);
     }
+
+    IEnumerator StartDialogue()
+    {
+        dialougeOne.SetActive(true);
+        yield return new WaitForSeconds(4);
+        dialougeOne.SetActive(false);
+        dialougeTwo.SetActive(true);
+        yield return new WaitForSeconds(4);
+        dialougeTwo.SetActive(false);
+
+
+    }
+
+
+   
+
+    
 }
